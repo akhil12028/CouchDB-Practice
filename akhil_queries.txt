@@ -1,0 +1,89 @@
+----View 1 : Count the randomArrayItems.
+
+{
+   "_id": "_design/randomArrayItems",
+   "_rev": "1-b74d376ef1e7e8048962f306a9dc4341",
+   "language": "javascript",
+   "views": {
+       "randomArrayItems": {
+           "map": "function(doc) {\n\tfor (var i in doc.data)\n\t{\n\t\tvar p = doc.data[i];\n\t\temit(p.randomArrayItem,1);\n\t}  \n}",
+           "reduce": "function(keys, values) \n{  \n\treturn sum(values);\n}"
+       }
+   }
+}
+
+
+----View 2 : Name(s) of the person(s) with the maximum age, and their age(s) by gender and whether they are active or not.
+
+{
+   "_id": "_design/max_age",
+   "_rev": "1-ceda24f3039302d8d27e85786c124c25",
+   "language": "javascript",
+   "views": {
+       "max_age": {
+           "map": "function(doc) {\n\tfor (var i in doc.data)\n\t{\n\t\tvar p = doc.data[i];\n\t\temit([p.gender,p.isActive],[p.age,p.name]);\n\t}  \n}",
+           "reduce": "function(keys, values, rereduce) \n{  \n\t var max = -Infinity\n\tvar name = []\n\tvar result = {'age':0, 'name':[]}\n    for(var i = 0; i < values.length; i++)\n        if(typeof values[i][0] == 'number')\n            result.age = Math.max(values[i][0], max)\n\t    \n    for(var i=0; i < values.length; i++)\n\tif(values[i][0] == result.age)\n\t\tresult.name=result.name.concat(values[i][1])\n\t\t\n\t\t\nreturn result\n    \n\t\n}"
+       }
+   }
+}
+
+
+----View 3 : A count of the people by tags, that is, count all the people with the given value in the tags array.
+
+{
+   "_id": "_design/tags_count",
+   "_rev": "1-fec7bc19eaeef5ae58f487046c995c4b",
+   "language": "javascript",
+   "views": {
+       "tags_count": {
+           "map": "function(doc) {\n\tfor (var i in doc.data)\n\t{\n\t\tvar p = doc.data[i];\n\t\tfor (var j in p.tags)\n\t\t\t{emit(p.tags[j], 1);}\n\t}  \n}",
+           "reduce": "function(keys, values) \n{  \n\treturn sum(values);\n}\n"
+       }
+   }
+}
+
+
+----View 4 : The average age of people by company.
+
+{
+   "_id": "_design/average_age_company",
+   "_rev": "1-c1518588b43c4cce058eb240c4ad670f",
+   "language": "javascript",
+   "views": {
+       "average_age_company": {
+           "map": "function(doc) {\n\tfor (var i in doc.data)\n\t{\n\t\tvar p = doc.data[i];\n\t\temit(p.company,p.age)\n\t}  \n}",
+           "reduce": "function(keys, values) \n{\n\tvar sum=0\n\tfor (var i=0;i<values.length;i++)\n\t{\n\t\tsum=sum+values[i]\n\t}  \n\tvar average = sum/values.length\n\tresult = Math.round(average*10)/10\t\n\treturn result.toString();\n}"
+       }
+   }
+}
+
+
+----View 5 : The JSON of the lattitude, longitude, and address of each employee that has a lattitude of more than 80.
+
+{
+   "_id": "_design/JSON_latitude",
+   "_rev": "1-154f3297cebfb7d919183a9723c7486b",
+   "language": "javascript",
+   "views": {
+       "JSON_latitude": {
+           "map": "function(doc) {\n\tfor (var i in doc.data)\n\t{\n\t\tvar p = doc.data[i];\n\t\tvar result = {'latitude':0, 'longitude':0, 'address':0}\n\t\tresult.latitude = p.latitude\n\t\tresult.longitude = p.longitude\n\t\tresult.address = p.address\t\t\n\n\t\tif(p.latitude>80)\n\t\t\temit(p.id,result)\n\t}  \n}"
+       }
+   }
+}
+
+
+----View 6 : Names of people and their friends that start with the letter "J" if they have at least one friend whose name starts with the letter "J".
+
+
+{
+   "_id": "_design/Friends_names",
+   "_rev": "1-7169e487dbf6a4d1877fb4593d9d73de",
+   "language": "javascript",
+   "views": {
+       "Friends_names": {
+           "map": "function(doc) {\n\tfor (var i in doc.data)\n\t{\n\t\tvar p = doc.data[i];\n\t\tfor (var j in p.friends)\n\t\t\tif(p.friends[j].name[0] == 'J')\n\t\t\t\temit(p.name,p.friends[j].name)\n\t}  \n}"
+       }
+   }
+}
+
+
